@@ -2,8 +2,8 @@
 import sys
 import codecs
 
-from . import cpplint
-from . import utils
+import cpplint
+import utils
 
 
 def run_lint( paths, nudgeOn=False ):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 nudge = True
                 continue
             else:
-                print(( "unknown arg [%s]" % arg ))
+                print( "unknown arg [%s]" % arg )
                 sys.exit(-1)
         paths.append( arg )
 

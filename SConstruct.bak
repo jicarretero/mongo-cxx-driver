@@ -12,8 +12,8 @@ import stat
 import sys
 import textwrap
 import types
-import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
+import urllib
+import urllib2
 
 import buildscripts.utils
 import buildscripts.docs
@@ -54,7 +54,7 @@ elif platform.startswith( "openbsd" ):
 elif "win32" == platform:
     windows = True
 else:
-    print(( "No special config for [" + platform + "] which probably means it won't work" ))
+    print( "No special config for [" + platform + "] which probably means it won't work" )
 
 nix = not windows
 
@@ -260,7 +260,7 @@ elif windows:
 
     add_option("win-version-min", "minimum Windows version to support", 1, True,
                type = 'choice', default = None,
-               choices = list(win_version_min_choices.keys()))
+               choices = win_version_min_choices.keys())
 
     # Someday get rid of --32 and --64 for windows and use these with a --msvc-target-arch flag
     # that mirrors msvc-host-arch.
@@ -388,8 +388,8 @@ SConsignFile(str(sconsDataDir.File('sconsign')))
 
 def printLocalInfo():
     import sys, SCons
-    print(( "scons version: " + SCons.__version__ ))
-    print(( "python version: " + " ".join( [ repr(i) for i in sys.version_info ] ) ))
+    print( "scons version: " + SCons.__version__ )
+    print( "python version: " + " ".join( [ `i` for i in sys.version_info ] ) )
 
 printLocalInfo()
 
@@ -511,12 +511,12 @@ env = Environment(variables=env_vars, **envDict)
 del envDict
 
 def fatal_error(env, msg, *args):
-    print((msg.format(*args)))
+    print (msg.format(*args))
     Exit(1)
 
 def conf_error(env, msg, *args):
-    print((msg.format(*args)))
-    print(("See {0} for details".format(env['CONFIGURELOG'].abspath)))
+    print (msg.format(*args))
+    print ("See {0} for details".format(env['CONFIGURELOG'].abspath))
 
     Exit(1)
 
@@ -524,12 +524,12 @@ env.AddMethod(fatal_error, 'FatalError')
 env.AddMethod(conf_error, 'ConfError')
 
 if has_option('variables-help'):
-    print((env_vars.GenerateHelpText(env)))
+    print (env_vars.GenerateHelpText(env))
     Exit(0)
 
 unknown_vars = env_vars.UnknownVariables()
 if unknown_vars:
-    env.FatalError("Unknown variables specified: {0}", ", ".join(list(unknown_vars.keys())))
+    env.FatalError("Unknown variables specified: {0}", ", ".join(unknown_vars.keys()))
 
 
 # Add any scons options that conflict with scons variables here.
@@ -928,7 +928,7 @@ if debugBuild:
     env.Append( CPPDEFINES=["MONGO_DEBUG_BUILD"] );
 
 try:
-    umask = os.umask(0o22)
+    umask = os.umask(022)
 except OSError:
     pass
 
@@ -1105,7 +1105,7 @@ def doConfigure(myenv):
             # form -Wno-xxx (but not -Wno-error=xxx), we also add -Wxxx to the flags. GCC does
             # warn on unknown -Wxxx style flags, so this lets us probe for availablity of
             # -Wno-xxx.
-            for kw in list(test_mutation.keys()):
+            for kw in test_mutation.keys():
                 test_flags = test_mutation[kw]
                 for test_flag in test_flags:
                     if test_flag.startswith("-Wno-") and not test_flag.startswith("-Wno-error="):
@@ -1119,7 +1119,7 @@ def doConfigure(myenv):
         # to make them real errors.
         cloned.Append(CCFLAGS=['-Werror'])
         conf = Configure(cloned, help=False, custom_tests = {
-                'CheckFlag' : lambda ctx : CheckFlagTest(ctx, tool, extension, flag)
+                'CheckFlag' : lambda(ctx) : CheckFlagTest(ctx, tool, extension, flag)
         })
         available = conf.CheckFlag()
         conf.Finish()
@@ -1437,7 +1437,7 @@ def doConfigure(myenv):
             "undefined" : myenv.File("#etc/ubsan.blacklist"),
         }
 
-        blackfiles = set([v for (k, v) in blackfiles_map.items() if k in sanitizer_list])
+        blackfiles = set([v for (k, v) in blackfiles_map.iteritems() if k in sanitizer_list])
         blacklist_options=["-fsanitize-blacklist=%s" % blackfile for blackfile in blackfiles]
 
         for blacklist_option in blacklist_options:
@@ -1447,7 +1447,7 @@ def doConfigure(myenv):
         llvm_symbolizer = get_option('llvm-symbolizer')
         if os.path.isabs(llvm_symbolizer):
             if not myenv.File(llvm_symbolizer).exists():
-                print(("WARNING: Specified symbolizer '%s' not found" % llvm_symbolizer))
+                print("WARNING: Specified symbolizer '%s' not found" % llvm_symbolizer)
                 llvm_symbolizer = None
         else:
             llvm_symbolizer = myenv.WhereIs(llvm_symbolizer)

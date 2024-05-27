@@ -7,9 +7,9 @@ A script that provides:
 4. Has support for checking which files are to be checked.
 5. Supports validating and updating a set of files to the right coding style.
 """
+from __future__ import print_function, absolute_import
 
-
-import queue
+import Queue
 import difflib
 import itertools
 import os
@@ -22,7 +22,7 @@ import tarfile
 import tempfile
 import threading
 import time
-import urllib.request, urllib.parse, urllib.error
+import urllib
 from distutils import spawn
 from optparse import OptionParser
 from multiprocessing import cpu_count
@@ -152,7 +152,7 @@ def get_clang_format_from_llvm(llvm_distro, tar_path, dest_file):
     # Download from LLVM
     print("Downloading clang-format %s from %s, saving to %s" % (CLANG_FORMAT_VERSION,
             url, temp_tar_file))
-    urllib.request.urlretrieve(url, temp_tar_file)
+    urllib.urlretrieve(url, temp_tar_file)
 
     extract_clang_format(temp_tar_file)
 
@@ -171,7 +171,7 @@ def get_clang_format_from_linux_cache(dest_file):
     # Download the file
     print("Downloading clang-format %s from %s, saving to %s" % (CLANG_FORMAT_VERSION,
             url, temp_tar_file))
-    urllib.request.urlretrieve(url, temp_tar_file)
+    urllib.urlretrieve(url, temp_tar_file)
 
     extract_clang_format(temp_tar_file)
 
@@ -318,7 +318,7 @@ def parallel_process(items, func):
 
     # print("Running across %d cpus" % (cpus))
 
-    task_queue = queue.Queue()
+    task_queue = Queue.Queue()
 
     # Use a list so that worker function will capture this variable
     pp_event = threading.Event()
@@ -331,7 +331,7 @@ def parallel_process(items, func):
         while not pp_event.is_set():
             try:
                 item = task_queue.get_nowait()
-            except queue.Empty:
+            except Queue.Empty:
                 # if the queue is empty, exit the worker thread
                 pp_event.set()
                 return

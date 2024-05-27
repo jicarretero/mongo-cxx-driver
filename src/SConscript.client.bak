@@ -3,12 +3,12 @@
 # This SConscript describes build and install rules for the Mongo C++ driver and associated exmaple
 # programs.
 import buildscripts.git
-import http.client
+import httplib
 import json
 import os
 import re
 import time
-import urllib.request, urllib.parse, urllib.error
+import urllib
 
 Import('env has_option get_option')
 Import('nix linux darwin windows')
@@ -414,7 +414,7 @@ if buildShared:
     mongoClientPrefixInstalls.append(mongoClientSharedLibPrefixInstall)
 
 inst = libEnv.InstallAs(['$INSTALL_DIR/include/' + x for x in clientHeaders], clientHeaders)
-libEnv.AddPostAction(inst, Chmod('$TARGET', 0o644))
+libEnv.AddPostAction(inst, Chmod('$TARGET', 0644))
 mongoClientPrefixInstalls.append(inst);
 
 
@@ -573,25 +573,25 @@ def setupMongoOrchestration(target, source, env):
             time.sleep(1)
 
         try:
-            conn = http.client.HTTPConnection(orchestration_uri, timeout=30)
+            conn = httplib.HTTPConnection(orchestration_uri, timeout=30)
             conn.request("GET", "/servers/standalone", headers=json_headers)
             response = conn.getresponse()
             message = response.read()
 
         except IOError:
-            print(("Cannot connect to Mongo Orchestration at %s on attempt %d. %d attempts remaining..."
-                  % (orchestration_uri, attempt, MO_MAX_RETRIES - (attempt))))
+            print("Cannot connect to Mongo Orchestration at %s on attempt %d. %d attempts remaining..."
+                  % (orchestration_uri, attempt, MO_MAX_RETRIES - (attempt)))
             continue
 
         if (response.status == 404):
             print("No standalone started, starting one now...")
-            post_conn = http.client.HTTPConnection(orchestration_uri, timeout=30)
+            post_conn = httplib.HTTPConnection(orchestration_uri, timeout=30)
             post_conn.request("POST", "/servers", params, json_headers)
             continue
         elif (response.status/100 != 2):
-            print(("Mongo Orchestration had an error with code %s" % response.status))
+            print("Mongo Orchestration had an error with code %s" % response.status)
             if message:
-                print(("\tmessage from MO: %s", message))
+                print("\tmessage from MO: %s", message)
             continue
 
         # Grab the port from the response -- use it in the tests
